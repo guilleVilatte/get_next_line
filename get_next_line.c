@@ -6,14 +6,11 @@
 /*   By: guill <guill@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 00:00:00 by guill             #+#    #+#             */
-/*   Updated: 2026/05/13 00:00:00 by guill            ###   ########.fr       */
+/*   Updated: 2026/05/22 14:43:00 by guvilatt         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
-
-char	*ft_strjoin(char *s1, const char *s2);
-char	*extract_line(char **stash);
 
 static int	read_and_append(int fd, char **stash, char *buffer)
 {
@@ -37,12 +34,37 @@ static void	clean_stash(char **stash)
 	*stash = NULL;
 }
 
+static char	*process_read_loop(int fd, char **stash, char *buffer)
+{
+	int		ret;
+	char	*line;
+
+	while (1)
+	{
+		ret = read_and_append(fd, stash, buffer);
+		if (ret < 0)
+			return (NULL);
+		line = extract_line(stash);
+		if (line)
+			return (line);
+		if (ret == 0)
+		{
+			if (*stash && (*stash)[0] != '\0')
+			{
+				line = *stash;
+				*stash = NULL;
+				return (line);
+			}
+			return (NULL);
+		}
+	}
+}
+
 char	*get_next_line(int fd)
 {
 	static char	*stash;
 	char		*line;
 	char		*buffer;
-	int			ret;
 
 	if (fd < 0 || BUFFER_SIZE <= 0)
 		return (NULL);
@@ -52,24 +74,9 @@ char	*get_next_line(int fd)
 	buffer = malloc(BUFFER_SIZE + 1);
 	if (!buffer)
 		return (clean_stash(&stash), NULL);
-	while (1)
-	{
-		ret = read_and_append(fd, &stash, buffer);
-		if (ret < 0)
-			return (free(buffer), clean_stash(&stash), NULL);
-		line = extract_line(&stash);
-		if (line)
-			return (free(buffer), line);
-		if (ret == 0)
-		{
-			free(buffer);
-			if (stash && stash[0] != '\0')
-			{
-				line = stash;
-				stash = NULL;
-				return (line);
-			}
-			return (clean_stash(&stash), NULL);
-		}
-	}
+	line = process_read_loop(fd, &stash, buffer);
+	free(buffer);
+	if (!line)
+		clean_stash(&stash);
+	return (line);
 }

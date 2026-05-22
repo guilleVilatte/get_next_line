@@ -6,13 +6,13 @@
 /*   By: guill <guill@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 00:00:00 by guill             #+#    #+#             */
-/*   Updated: 2026/05/13 00:00:00 by guill            ###   ########.fr       */
+/*   Updated: 2026/05/22 14:48:31 by guvilatt         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
-size_t	ft_strlen(const char *s)
+static size_t	ft_strlen(const char *s)
 {
 	size_t	i;
 
@@ -22,7 +22,8 @@ size_t	ft_strlen(const char *s)
 	return (i);
 }
 
-char	*ft_strchr(const char *s, int c)
+/*
+static char	*ft_strchr(const char *s, int c)
 {
 	int	i;
 
@@ -39,8 +40,8 @@ char	*ft_strchr(const char *s, int c)
 		return ((char *)&s[i]);
 	return (NULL);
 }
-
-char	*ft_strdup(const char *s)
+*/
+static char	*ft_strdup(const char *s)
 {
 	char	*dup;
 	size_t	len;
@@ -77,19 +78,13 @@ char	*ft_strjoin(char *s1, const char *s2)
 	result = malloc(len1 + len2 + 1);
 	if (!result)
 		return (free(s1), NULL);
-	i = 0;
-	while (s1 && s1[i])
-	{
+	i = -1;
+	while (s1 && s1[++i])
 		result[i] = s1[i];
-		i++;
-	}
 	free(s1);
-	i = 0;
-	while (s2[i])
-	{
+	i = -1;
+	while (s2[++i])
 		result[len1 + i] = s2[i];
-		i++;
-	}
 	result[len1 + len2] = '\0';
 	return (result);
 }
@@ -110,12 +105,9 @@ char	*extract_line(char **stash)
 	line = malloc(i + 2);
 	if (!line)
 		return (NULL);
-	i = 0;
-	while ((*stash)[i] != '\n')
-	{
+	i = -1;
+	while ((*stash)[++i] != '\n')
 		line[i] = (*stash)[i];
-		i++;
-	}
 	line[i] = '\n';
 	line[i + 1] = '\0';
 	temp = ft_strdup(*stash + i + 1);
